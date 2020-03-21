@@ -16,14 +16,42 @@ let usedPikofbalRecently = new Set();
 
 let usedRandyRecently = false;
 
+let voorDeDeur = new Set();
+
+let inInterjel = new Set();
+
 const leeftijdRandy = moment().year(1987).month(7).day(6);
+
+const binnenRole = '689137029912592385';
+
+const voordeurChannel = '689134930588205067';
+
+const interjelChannel = '688797072668885091';
 
 bot.on('ready', () => {
     console.log(`Logged in as ${bot.user.tag}!`);
 });
-
+bot.on('voiceStateUpdate', (oldState, newState)=>{
+    const joinedChannel = newState.channelID;
+    const leftChannel = oldState.channelID;
+    if (joinedChannel === voordeurChannel){
+        voorDeDeur.add(newState.member.id);
+    }
+    if (leftChannel === voordeurChannel){
+        voorDeDeur.delete(oldState.member.id);
+    }
+    if (leftChannel === interjelChannel){
+        inInterjel.delete(oldState.member.id);
+    }
+    if (joinedChannel === interjelChannel){
+        inInterjel.add(newState.member.id);
+    }
+    if (joinedChannel === null && leftChannel !== null){
+        oldState.member.roles.remove(binnenRole);
+    }
+});
 bot.on('message', msg=>{
-    if(msg.content === "nice"){
+    if(msg.content === "nice" || msg.content === "Nice"){
         msg.react('👌')
             }
     if(msg.content.substr(0,1) === "!") {
@@ -43,30 +71,38 @@ bot.on('message', msg=>{
                 break;
 
             case 'bel':
-                if (usedBelrecently === true) {
-                    msg.reply("Doe rustig a woeshoem we gooien shantan die deur open")
-                } else {
-                    msg.channel.send("DING DONG", {
-                        tts: true
-                    });
-                    msg.member.roles.add('689137029912592385');
-                    usedBelrecently = true;
-                    setTimeout(() => {
-                        usedBelrecently = false;
-                    }, 30000)
+                if(voorDeDeur.has(msg.author.id)){
+                    if (usedBelrecently === true) {
+                        msg.reply("Doe rustig a woeshoem we gooien shantan die deur open")
+                    } else {
+                        msg.channel.send("DING DONG", {
+                            tts: true
+                        });
+                        msg.member.roles.add(binnenRole);
+                        usedBelrecently = true;
+                        setTimeout(() => {
+                            usedBelrecently = false;
+                        }, 30000)
+                    }
+                }else {
+                    msg.reply("Wat denk jij, je kan toch niet aanbellen als je niet voor de deur staat a dommert.")
                 }
                 break;
 
             case 'rondje':
                 msg.delete();
-                if (usedRandyRecently === true) {
-                    msg.reply("Randy is al onderweg naar de bar maar hij is druk bezig met mensen lastig vallen!")
-                } else {
-                    msg.channel.send("EWA IK BEN RANDY EN IK GEEF EEN RONDJE", {files: ["randy.jpg"]});
-                    usedRandyRecently = true;
-                    setTimeout(() => {
-                        usedRandyRecently = false;
-                    }, 120000)
+                if(inInterjel.has(msg.author.id)) {
+                    if (usedRandyRecently === true) {
+                        msg.reply("Randy is al onderweg naar de bar maar hij is druk bezig met mensen lastig vallen!")
+                    } else {
+                        msg.channel.send("EWA IK BEN RANDY EN IK GEEF EEN RONDJE", {files: ["randy.jpg"]});
+                        usedRandyRecently = true;
+                        setTimeout(() => {
+                            usedRandyRecently = false;
+                        }, 120000)
+                    }
+                }else{
+                    msg.reply("Hoe kan Randy nou rondje geven als jij er niet eens bent a dommert")
                 }
                 break;
 
