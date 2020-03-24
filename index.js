@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const Sound = require('node-aplay');
 const moment = require("moment");
 const birthdays = require("./birthdays.json");
 
@@ -8,8 +7,6 @@ const bot = new Discord.Client();
 const token = 'Njg5MDY0OTc2MDM1NDc5NTg0.XnEoFQ.DLf_wZ1gsdRtSQ5TKqfHWhLIzH8';
 
 const PREFIX = '!';
-
-const deurSound = new Sound('deur.mp3');
 
 let usedBelrecently = false;
 
@@ -20,8 +17,6 @@ let usedRandyRecently = false;
 let voorDeDeur = new Set();
 
 let inInterjel = new Set();
-
-const leeftijdRandy = moment().year(1987).month(7).day(6);
 
 const binnenRole = '689137029912592385';
 
@@ -39,6 +34,7 @@ bot.on('ready', () => {
 bot.on('voiceStateUpdate', (oldState, newState)=>{
     const joinedChannel = newState.channelID;
     const leftChannel = oldState.channelID;
+
     if (joinedChannel === voordeurChannel){
         voorDeDeur.add(newState.member.id);
     }
@@ -59,17 +55,21 @@ bot.on('voiceStateUpdate', (oldState, newState)=>{
         oldState.member.roles.remove(binnenRole);
     }
 });
+
 bot.on('message', msg=>{
     if(msg.content === "nice" || msg.content === "Nice"){
         msg.react('👌')
             }
-    if(msg.content.substr(0,1) === "!") {
+
+    if(msg.content.substr(0,PREFIX.length) === PREFIX) {
         let args = msg.content.substring(PREFIX.length).split(" ");
+
         switch (args[0]) {
 
             case 'pikofbal':
+
                 if (usedPikofbalRecently.has(msg.author.id)) {
-                    msg.reply("Doe rustig a woeshoem");
+                    msg.reply("Doe rustig a woeshoem.");
                 } else {
                     msg.channel.send((Math.random() > 0.5) ? "pik" : "bal");
                     usedPikofbalRecently.add(msg.author.id);
@@ -80,9 +80,11 @@ bot.on('message', msg=>{
                 break;
 
             case 'bel':
+
                 if(voorDeDeur.has(msg.author.id)){
+
                     if (usedBelrecently === true) {
-                        msg.reply("Doe rustig a woeshoem we gooien shantan die deur open")
+                        msg.reply("Doe rustig a woeshoem we gooien shantan die deur open.")
                     } else {
                         msg.channel.send("DING DONG", {
                             tts: true
@@ -100,25 +102,26 @@ bot.on('message', msg=>{
 
             case 'rondje':
                 msg.delete();
+
                 if(inInterjel.has(msg.author.id)) {
                     if (usedRandyRecently === true) {
                         msg.reply("Randy is al onderweg naar de bar maar hij is druk bezig met mensen lastig vallen!")
                     } else {
-                        msg.channel.send("EWA IK BEN RANDY EN IK GEEF EEN RONDJE", {files: ["randy.jpg"]});
+                        msg.channel.send("EWA IK BEN RANDY EN IK GEEF EEN RONDJE!", {files: ["randy.jpg"]});
                         usedRandyRecently = true;
                         setTimeout(() => {
                             usedRandyRecently = false;
                         }, 120000)
                     }
                 }else{
-                    msg.reply("Hoe kan Randy nou rondje geven als jij er niet eens bent a dommert")
+                    msg.reply("Hoe kan Randy nou rondje geven als jij er niet eens bent a dommert.")
                 }
                 break;
 
             case 'hoeoudis':
                 let huts = false;
 
-                if(args[1] !== null || args[1] !== undefined || args[1]){
+                if(args[1]){
 
                         for (let birthday in birthdays) {
 
@@ -128,13 +131,13 @@ bot.on('message', msg=>{
                                 const year = verjaardag[0];
                                 const month = verjaardag[1];
                                 const day = verjaardag[2];
-                                const leeftijd = moment().year(year).month(month).date(day);
 
                                 let diffrence = moment()
-                                    .subtract(leeftijd.year(), 'years')
-                                    .subtract(leeftijd.month(), 'month')
-                                    .subtract(leeftijd.date(), 'days')
+                                    .subtract(year, 'years')
+                                    .subtract(month, 'month')
+                                    .subtract(day, 'days')
                                     .add(1, 'month');
+
 
                                 msg.channel.send(birthdays[birthday].firstname + " is " + diffrence.year() + " jaar, " + diffrence.month() + " maanden en " + diffrence.date() + " dagen");
                                 huts = true;
@@ -145,20 +148,13 @@ bot.on('message', msg=>{
                             msg.reply("Deze man is off-radar, welloe stats ready.");
                         }
                 }else{
-                    msg.reply("Moet je wel een naam invoeren, debiel");
+                    msg.reply("Moet je wel een naam invoeren, debiel.");
                     break;
                 }
                 break;
 
             case 'hoeoudisrandy':
-                msg.reply("Deze is deprecated man broer je heb nu andere die wel goed werkt, huts !help voor een cadeau van Niels Rietkerk");
-                // let diffrence = moment()
-                //     .subtract(leeftijdRandy.year(), 'years')
-                //     .subtract(leeftijdRandy.month(), 'month')
-                //     .subtract(leeftijdRandy.day(), 'days')
-                //     .add(1, 'month');
-                //
-                // msg.channel.send("Randy is " + diffrence.year() + " jaar, " + diffrence.month() + " maanden en " + diffrence.date() + " dagen");
+                msg.reply("Deze is buiten gebruik man broer je heb nu andere die wel goed werkt, huts !help voor een cadeau van Niels Rietkerk.");
                 break;
 
             case 'help':
@@ -190,6 +186,7 @@ bot.on('message', msg=>{
                 //         tts: true
                 //     });
                 break;
+
             default:
                 msg.reply("Deze bestaat niet bro, try die !help als je niet begrijp");
                 break;
