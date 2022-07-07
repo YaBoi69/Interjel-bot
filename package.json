@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "discord.js": "^12.0.2",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "node-aplay": "^1.0.3",
     "node-opus": "^0.3.3",
     "ytdl-core": "^2.0.1"
